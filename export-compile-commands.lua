@@ -1,3 +1,5 @@
+-- generates the JSON compilation database for all projects within a workspace, 
+-- creates a symlink on the workspace root which configures the environment
 -- reference the premake handle
 local p = premake
 print "you loaded the compile-commands module!"
@@ -93,6 +95,14 @@ function m.getProjectCommands(prj, cfg)
   return cmds
 end
 
+-- link to the compilation database from the workspace directory 
+-- for now we just link to the debug
+function m.createSymLink(target_database)
+  print("Creatig symbolic link to compilation database..")
+  local shell_cmd = string.format("ln --force --symbolic %s compile_commands.json", target_database)
+  os.execute( shell_cmd )
+end
+
 local function execute()
   for wks in p.global.eachWorkspace() do
     local cfgCmds = {}
@@ -105,6 +115,8 @@ local function execute()
         cfgCmds[cfgKey] = table.join(cfgCmds[cfgKey], m.getProjectCommands(prj, cfg))
       end
     end
+
+    -- concatenate each config command table into an overarching compilation database for that project
     for cfgKey,cmds in pairs(cfgCmds) do
       local outfile = string.format('compile_commands/%s/compile_commands.json', cfgKey)
       p.generate(wks, outfile, function(wks)
@@ -127,6 +139,11 @@ local function execute()
         end
         p.w(']')
       end)
+      -- create a symlink to the workspace-scoped compile_commands - must have a debug target
+      -- yet to test on multiple workspaces..
+      if ( cfgKey == "debug" ) then
+        m.createSymLink(outfile)
+      end
     end
   end
 end
