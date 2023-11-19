@@ -1,5 +1,8 @@
+-- reference the premake handle
 local p = premake
+print "you loaded the compile-commands module!"
 
+-- create a reference to the module in premake
 p.modules.export_compile_commands = {}
 local m = p.modules.export_compile_commands
 
@@ -99,7 +102,7 @@ local function execute()
       end
     end
     for cfgKey,cmds in pairs(cfgCmds) do
-      local outfile = string.format('compile_commands/%s.json', cfgKey)
+      local outfile = string.format('compile_commands/%s/compile_commands.json', cfgKey)
       p.generate(wks, outfile, function(wks)
         p.w('[')
         for i = 1, #cmds do
