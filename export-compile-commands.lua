@@ -46,15 +46,19 @@ end
 
 function m.getFileFlags(prj, cfg, node)
   return table.join(m.getCommonFlags(cfg), {
-    '-o', m.getObjectPath(prj, cfg, node),
-    '-MF', m.getDependenciesPath(prj, cfg, node),
-    '-c', node.abspath
+    '-o', m.getObjectPath(prj, cfg, node), -- yes
+    -- -MF outputs a rule describing the dependencies of the main source file
+    -- explicitly defining the dependency output file
+    -- '-MF', m.getDependenciesPath(prj, cfg, node), -- no?
+
+    '-c', node.abspath -- yes
   })
 end
 
 function m.generateCompileCommand(prj, cfg, node)
   return {
-    directory = prj.location,
+    -- directory = prj.location,
+    directory = cfg.objdir,
     file = node.abspath,
     command = 'cc '.. table.concat(m.getFileFlags(prj, cfg, node), ' ')
   }
